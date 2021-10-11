@@ -1,28 +1,35 @@
 import React, { useState } from "react";
 
+const INIT_STATE = {
+  username: "",
+  password: "",
+  loggedIn: false,
+  error: "",
+  loading: false,
+};
+
 export default function App() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState(INIT_STATE);
+  const { username, password, loggedIn, error, loading } = state;
 
   async function login(e) {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    setState({ ...state, error: "", loading: true });
     await new Promise((r) => setTimeout(r, 1000));
     if (username == "user" && password == "pass") {
-      setPassword("");
-      setLoggedIn(true);
+      setState((state) => ({ ...state, password: "", loggedIn: true }));
     } else {
-      setError("invalid username or password");
+      setState((state) => ({
+        ...state,
+        error: "invalid username or password",
+      }));
     }
-    setLoading(false);
+
+    setState((state) => ({ ...state, loading: false }));
   }
 
   function logout() {
-    setLoggedIn(false);
+    setState({ ...state, loggedIn: false });
   }
 
   return loggedIn ? (
@@ -35,13 +42,13 @@ export default function App() {
       <input
         placeholder="username"
         value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        onChange={(e) => setState({ ...state, username: e.target.value })}
       />
       <input
         type="password"
         placeholder="password"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => setState({ ...state, password: e.target.value })}
       />
       <p style={{ color: "red" }}>{error}</p>
       <button disabled={loading}>Login</button>
