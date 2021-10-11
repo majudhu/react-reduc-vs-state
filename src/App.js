@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 
 const INIT_STATE = {
   username: "",
@@ -8,28 +8,46 @@ const INIT_STATE = {
   loading: false,
 };
 
+function loginReducer(state, action) {
+  switch (action.type) {
+    case "username":
+      return { ...state, username: action.payload };
+    case "password":
+      return { ...state, password: action.payload };
+    case "loading":
+      return { ...state, error: "", loading: true };
+    case "error":
+      return { ...state, loading: false, error: action.payload };
+    case "login":
+      return {
+        ...state,
+        error: "",
+        password: "",
+        loading: false,
+        loggedIn: true,
+      };
+    case "logout":
+      return { ...state, loggedIn: false };
+  }
+}
+
 export default function App() {
-  const [state, setState] = useState(INIT_STATE);
+  const [state, dispatch] = useReducer(loginReducer, INIT_STATE);
   const { username, password, loggedIn, error, loading } = state;
 
   async function login(e) {
     e.preventDefault();
-    setState({ ...state, error: "", loading: true });
+    dispatch({ type: "loading" });
     await new Promise((r) => setTimeout(r, 1000));
     if (username == "user" && password == "pass") {
-      setState((state) => ({ ...state, password: "", loggedIn: true }));
+      dispatch({ type: "login" });
     } else {
-      setState((state) => ({
-        ...state,
-        error: "invalid username or password",
-      }));
+      dispatch({ type: "error", payload: "invalid username or password" });
     }
-
-    setState((state) => ({ ...state, loading: false }));
   }
 
   function logout() {
-    setState({ ...state, loggedIn: false });
+    dispatch({ type: "logout" });
   }
 
   return loggedIn ? (
@@ -42,13 +60,17 @@ export default function App() {
       <input
         placeholder="username"
         value={username}
-        onChange={(e) => setState({ ...state, username: e.target.value })}
+        onChange={(e) =>
+          dispatch({ type: "username", payload: e.target.value })
+        }
       />
       <input
         type="password"
         placeholder="password"
         value={password}
-        onChange={(e) => setState({ ...state, password: e.target.value })}
+        onChange={(e) =>
+          dispatch({ type: "password", payload: e.target.value })
+        }
       />
       <p style={{ color: "red" }}>{error}</p>
       <button disabled={loading}>Login</button>
